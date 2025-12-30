@@ -34,7 +34,7 @@ async function main(params) {
     if (avatar) {
       try {
         // Initialize file storage
-        const files = await filesLib.init()
+        const files = await stateFiles.init()
         
         // Determine file extension from filename or default to jpg
         let extension = 'jpg'

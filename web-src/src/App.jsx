@@ -82,7 +82,7 @@ function App() {
       const response = await fetch(`${API_BASE}/save-user`, {
         method: 'POST',
         headers: getHeaders(),
-        body: JSON.stringify({ name: name.trim(), active })
+        body: JSON.stringify(payload)
       });
       const newUser = await response.json();
       setUsers([...users, newUser]);
