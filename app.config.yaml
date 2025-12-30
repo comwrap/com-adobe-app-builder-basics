@@ -1,0 +1,17 @@
+application:
+  actions: actions
+  web: web-src
+  runtimeManifest:
+    packages:
+      simpleApp:
+        license: Apache-2.0
+        actions:
+          hello:
+            function: actions/hello/index.js
+            web: 'yes'
+            inputs:
+              TEST_VAR_MODIFIED: $TEST_VAR
+              TEST_VAR_DEFINED: 'Hello World Action Variable'
+            runtime: nodejs:22
+            annotations:
+              require-adobe-auth: true

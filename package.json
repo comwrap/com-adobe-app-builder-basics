@@ -1,0 +1,12 @@
+{
+    "name": "appbuilder-extension",
+    "version": "0.0.1",
+    "dependencies": {
+      "@adobe/aio-sdk": "^6",
+      "@adobe/exc-app": "^1.4.20"
+    },
+    "engines": {
+      "node": ">=22"
+    }
+  }
+  
