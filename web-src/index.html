@@ -3,10 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Management Application</title>
+    <title>Adobe App Builder Application</title>
     <script type="module" src="src/ims-standalone.js"></script>
 </head>
 <body>
-    <div id="root"></div>
+    <h1>Hello Action</h1>
+    <button id="callAction">Invoke Action</button>
+    <pre id="output">Click the button to run hello.</pre>
+
+    <script>
+        const button = document.getElementById('callAction');
+        const output = document.getElementById('output');
+        const actionUrl = '/api/v1/web/simpleApp/hello';
+
+        button.addEventListener('click', async () => {
+            button.disabled = true;
+            output.textContent = 'Calling action...';
+
+            let headers = { 'Accept': 'application/json' };
+            const ims = window.imsCredentials;
+            console.log('ims', ims);
+            
+            if (ims && ims.token) {
+                headers['Authorization'] = 'Bearer ' + ims.token;
+                headers['x-gw-ims-org-id'] = ims.org || '';
+            }
+
+            const response = await fetch(actionUrl, { headers });
+            const payload = await response.json();
+            output.textContent = JSON.stringify(payload, null, 2);
+            button.disabled = false;
+        });
+    </script>
 </body>
 </html>
