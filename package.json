@@ -2,6 +2,7 @@
     "name": "appbuilder-extension",
     "version": "0.0.1",
     "dependencies": {
+        "@adobe/aio-lib-files": "^4.1.2",
         "@adobe/aio-lib-state": "^5.3.0",
         "@adobe/aio-sdk": "^6",
         "@adobe/exc-app": "^1.4.20",

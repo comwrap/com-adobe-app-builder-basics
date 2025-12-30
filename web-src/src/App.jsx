@@ -17,7 +17,9 @@ import {
   Cell,
   ActionButton,
   Text,
-  ProgressCircle
+  ProgressCircle,
+  FileTrigger,
+  Avatar
 } from '@adobe/react-spectrum';
 import Delete from '@spectrum-icons/workflow/Delete';
 
@@ -30,6 +32,9 @@ function App() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
+
 
   // Get auth headers
   const getHeaders = () => {
@@ -64,6 +69,14 @@ function App() {
   const handleSave = async () => {
     if (!name.trim()) return;
     
+    const payload = { name: name.trim(), active };
+
+     // Add avatar if selected
+     if (avatarFile) {
+        payload.avatar = await fileToBase64(avatarFile);
+        payload.avatarFileName = avatarFile.name;
+      }
+
     setSaving(true);
     try {
       const response = await fetch(`${API_BASE}/save-user`, {
@@ -75,6 +88,8 @@ function App() {
       setUsers([...users, newUser]);
       setName('');
       setActive('Yes');
+      setAvatarFile(null);
+      setAvatarPreview(null);
     } catch (error) {
       console.error('Error saving user:', error);
     }
@@ -91,6 +106,31 @@ function App() {
       setUsers(users.filter(user => user.id !== id));
     } catch (error) {
       console.error('Error deleting user:', error);
+    }
+  };
+
+  // Convert file to base64
+  const fileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        // Remove the data URL prefix (e.g., "data:image/png;base64,")
+        const base64 = reader.result.split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  // Handle avatar file selection
+  const handleAvatarSelect = (files) => {
+    if (files && files.length > 0) {
+      const file = files[0];
+      setAvatarFile(file);
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setAvatarPreview(previewUrl);
     }
   };
 
@@ -124,6 +164,30 @@ function App() {
               <Item key="No">No</Item>
             </Picker>
             
+            <View>
+              <Text UNSAFE_style={{ fontSize: '12px', fontWeight: 500, marginBottom: '4px', display: 'block' }}>
+                Avatar
+              </Text>
+              <Flex alignItems="center" gap="size-100">
+                <FileTrigger
+                  acceptedFileTypes={['image/jpeg', 'image/jpg', 'image/png']}
+                  onSelect={(e) => {
+                    if (e) {
+                      const files = Array.from(e);
+                      handleAvatarSelect(files);
+                    }
+                  }}
+                >
+                  <Button variant="secondary">
+                    {avatarFile ? 'Change Avatar' : 'Select Avatar'}
+                  </Button>
+                </FileTrigger>
+                {avatarPreview && (
+                  <Avatar src={avatarPreview} alt="Avatar preview" size="avatar-size-400" />
+                )}
+              </Flex>
+            </View>
+            
             <Button 
               variant="cta" 
               onPress={handleSave}
@@ -146,6 +210,7 @@ function App() {
             height="size-4600"
           >
             <TableHeader>
+              <Column key="avatar" width="80px" align="center">Avatar</Column>
               <Column key="name" width="2fr">Name</Column>
               <Column key="active" width="1fr">Active</Column>
               <Column key="action" width="1fr" align="center">Action</Column>
@@ -153,6 +218,13 @@ function App() {
             <TableBody>
               {users.map((user) => (
                 <Row key={user.id}>
+                 <Cell>
+                    {user.avatarUrl ? (
+                      <Avatar src={user.avatarUrl} alt={`${user.name}'s avatar`} size="avatar-size-400" />
+                    ) : (
+                      <Avatar alt="No avatar" size="avatar-size-400" />
+                    )}
+                  </Cell>
                   <Cell>{user.name}</Cell>
                   <Cell>{user.active}</Cell>
                   <Cell>

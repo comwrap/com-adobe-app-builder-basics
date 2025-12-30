@@ -1,6 +1,7 @@
 const { Core } = require('@adobe/aio-sdk')
 const stateLib = require('@adobe/aio-lib-state')
 
+
 async function main(params) {
   const logger = Core.Logger('delete-user')
   
