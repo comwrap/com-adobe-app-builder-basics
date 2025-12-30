@@ -1,0 +1,8 @@
+{
+  "name": "simpleApp",
+  "displayName": "User Management",
+  "description": "User Management App Builder Extension for Adobe Commerce Admin",
+  "platform": "web",
+  "id": "simpleApp",
+  "version": "1.0.0"
+}

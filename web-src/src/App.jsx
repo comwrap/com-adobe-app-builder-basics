@@ -22,6 +22,9 @@ import {
   Avatar
 } from '@adobe/react-spectrum';
 import Delete from '@spectrum-icons/workflow/Delete';
+import { attach } from '@adobe/uix-guest';
+
+const extensionId = 'simpleApp';
 
 // API endpoints
 const API_BASE = '/api/v1/web/simpleApp';
@@ -49,7 +52,18 @@ function App() {
 
   // Load users on mount
   useEffect(() => {
-    loadUsers();
+    const fetchCredentials = async () => {
+      if (!window.imsCredentials?.token) {
+        const guestConnection = await attach({ id: extensionId });
+        window.imsCredentials = {
+          token: guestConnection?.sharedContext?.get('imsToken'),
+          org: guestConnection?.sharedContext?.get('imsOrgId')
+        };
+      }
+      loadUsers();
+    };
+
+    fetchCredentials();
   }, []);
 
   const loadUsers = async () => {
