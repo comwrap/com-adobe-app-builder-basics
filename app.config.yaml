@@ -15,3 +15,21 @@ application:
             runtime: nodejs:22
             annotations:
               require-adobe-auth: true
+          save-user:
+            function: actions/users/save.js
+            web: 'yes'
+            runtime: nodejs:22
+            annotations:
+              require-adobe-auth: true
+          list-users:
+            function: actions/users/list.js
+            web: 'yes'
+            runtime: nodejs:22
+            annotations:
+              require-adobe-auth: true
+          delete-user:
+            function: actions/users/delete.js
+            web: 'yes'
+            runtime: nodejs:22
+            annotations:
+              require-adobe-auth: true

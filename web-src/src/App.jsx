@@ -1,0 +1,177 @@
+import React, { useState, useEffect } from 'react';
+import {
+  Provider,
+  defaultTheme,
+  Flex,
+  View,
+  Heading,
+  TextField,
+  Picker,
+  Item,
+  Button,
+  TableView,
+  TableHeader,
+  TableBody,
+  Column,
+  Row,
+  Cell,
+  ActionButton,
+  Text,
+  ProgressCircle
+} from '@adobe/react-spectrum';
+import Delete from '@spectrum-icons/workflow/Delete';
+
+// API endpoints
+const API_BASE = '/api/v1/web/simpleApp';
+
+function App() {
+  const [name, setName] = useState('');
+  const [active, setActive] = useState('Yes');
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  // Get auth headers
+  const getHeaders = () => {
+    const headers = { 'Content-Type': 'application/json' };
+    const ims = window.imsCredentials;
+    if (ims && ims.token) {
+      headers['Authorization'] = 'Bearer ' + ims.token;
+      headers['x-gw-ims-org-id'] = ims.org || '';
+    }
+    return headers;
+  };
+
+  // Load users on mount
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const loadUsers = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_BASE}/list-users`, {
+        headers: getHeaders()
+      });
+      const data = await response.json();
+      setUsers(data.users || []);
+    } catch (error) {
+      console.error('Error loading users:', error);
+    }
+    setLoading(false);
+  };
+
+  const handleSave = async () => {
+    if (!name.trim()) return;
+    
+    setSaving(true);
+    try {
+      const response = await fetch(`${API_BASE}/save-user`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({ name: name.trim(), active })
+      });
+      const newUser = await response.json();
+      setUsers([...users, newUser]);
+      setName('');
+      setActive('Yes');
+    } catch (error) {
+      console.error('Error saving user:', error);
+    }
+    setSaving(false);
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await fetch(`${API_BASE}/delete-user`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({ id })
+      });
+      setUsers(users.filter(user => user.id !== id));
+    } catch (error) {
+      console.error('Error deleting user:', error);
+    }
+  };
+
+  return (
+    <Provider theme={defaultTheme} colorScheme="light">
+      <View padding="size-400">
+        <Heading level={1} marginBottom="size-300">User Management</Heading>
+        
+        {/* Form Section */}
+        <View 
+          backgroundColor="gray-50" 
+          padding="size-300" 
+          borderRadius="medium"
+          marginBottom="size-400"
+        >
+          <Flex direction="row" gap="size-200" alignItems="end" wrap>
+            <TextField
+              label="Name"
+              value={name}
+              onChange={setName}
+              width="size-3000"
+            />
+            
+            <Picker
+              label="Active"
+              selectedKey={active}
+              onSelectionChange={setActive}
+              width="size-1600"
+            >
+              <Item key="Yes">Yes</Item>
+              <Item key="No">No</Item>
+            </Picker>
+            
+            <Button 
+              variant="cta" 
+              onPress={handleSave}
+              isDisabled={!name.trim() || saving}
+            >
+              {saving ? 'Saving...' : 'Save'}
+            </Button>
+          </Flex>
+        </View>
+
+        {/* Table Section */}
+        {loading ? (
+          <Flex justifyContent="center" marginTop="size-500">
+            <ProgressCircle aria-label="Loading users" isIndeterminate />
+          </Flex>
+        ) : (
+          <TableView
+            aria-label="User data table"
+            selectionMode="none"
+            height="size-4600"
+          >
+            <TableHeader>
+              <Column key="name" width="2fr">Name</Column>
+              <Column key="active" width="1fr">Active</Column>
+              <Column key="action" width="1fr" align="center">Action</Column>
+            </TableHeader>
+            <TableBody>
+              {users.map((user) => (
+                <Row key={user.id}>
+                  <Cell>{user.name}</Cell>
+                  <Cell>{user.active}</Cell>
+                  <Cell>
+                    <ActionButton
+                      isQuiet
+                      onPress={() => handleDelete(user.id)}
+                    >
+                      <Delete />
+                      <Text>Delete</Text>
+                    </ActionButton>
+                  </Cell>
+                </Row>
+              ))}
+            </TableBody>
+          </TableView>
+        )}
+      </View>
+    </Provider>
+  );
+}
+
+export default App;
