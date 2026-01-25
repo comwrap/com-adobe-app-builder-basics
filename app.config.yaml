@@ -33,6 +33,12 @@ application:
             runtime: nodejs:22
             annotations:
               require-adobe-auth: true
+          ac-customer:
+            function: actions/users/ac-customer.js
+            web: 'yes'
+            runtime: nodejs:22
+            annotations:
+              require-adobe-auth: true
 extensions:
   commerce/backend-ui/1:
     $include: ./ext.config.yaml  
